@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Зимний Анархия - Правила Серверов</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #e2e8f0;
+        }
+
+        /* Animated Background */
+        .winter-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .snowflake {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1em;
+            animation: fall linear infinite;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0.3;
+            }
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 20px 40px rgba(56, 189, 248, 0.15);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #38bdf8, #818cf8);
+            border-radius: 5px;
+        }
+
+        /* Typography */
+        .title-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Frost Effect */
+        .frost-border {
+            position: relative;
+        }
+
+        .frost-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.5), transparent);
+        }
+
+        /* Rule Number Badge */
+        .rule-badge {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(129, 140, 248, 0.2));
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Animation Classes */
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+
+        /* Interactive Elements */
+        .rule-item {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .rule-item:hover {
+            border-left-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.05);
+            padding-left: 1.5rem;
+        }
+
+        /* Punishment Tags */
+        .punishment-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.5rem;
+        }
+
+        .punishment-ban {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .punishment-mute {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .punishment-kick {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .punishment-warn {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* Navigation Active State */
+        .nav-link.active {
+            background: rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.3), transparent);
+            margin: 3rem 0;
+        }
+
+        /* Glow Effect */
+        .glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Ice Crystal Decoration */
+        .ice-crystal {
+            position: absolute;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        /* Loading Animation */
+        .loader {
+            border: 3px solid rgba(56, 189, 248, 0.1);
+            border-top: 3px solid #38bdf8;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="relative">
+
+    <!-- Snow Animation Container -->
+    <div class="winter-bg" id="snowContainer"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-card border-b border-slate-700/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <span class="title-font text-xl font-bold gradient-text tracking-wider">WINTER ANARCHY</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="#general" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all">Общие</a>
+                    <a href="#chat" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all">Чат</a>
+                    <a href="#behavior" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all">Поведение</a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10" onclick="toggleMobileMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu fixed inset-y-0 left-0 w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-700 md:hidden z-50" id="mobileMenu">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-8">
+                    <span class="title-font text-lg font-bold gradient-text">Меню</span>
+                    <button onclick="toggleMobileMenu()" class="text-slate-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="space-y-2">
+                    <a href="#general" onclick="toggleMobileMenu()" class="block px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5 hover:text-white transition-all">Общие правила</a>
+                    <a href="#chat" onclick="toggleMobileMenu()" class="block px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5 hover:text-white transition-all">Правила чата</a>
+                    <a href="#behavior" onclick="toggleMobileMenu()" class="block px-4 py-3 rounded-lg text-slate-300 hover:bg-white/5 hover:text-white transition-all">Поведение на сервере</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="glow top-20 left-1/4"></div>
+            <div class="glow bottom-20 right-1/4"></div>
+        </div>
+        
+        <div class="relative z-10 max-w-5xl mx-auto text-center fade-in-up">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-6">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                Актуальная версия правил
+            </div>
+            <h1 class="title-font text-5xl md:text-7xl font-black mb-6 leading-tight">
+                <span class="block text-white">ПРАВИЛА</span>
+                <span class="gradient-text">СЕРВЕРА</span>
+            </h1>
+            <p class="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                Зимняя атмосфера строгого порядка. Ознакомьтесь с правилами перед началом игры на наших серверах анархии.
+            </p>
+            
+            <div class="mt-10 flex flex-wrap justify-center gap-4">
+                <div class="glass-card px-6 py-4 rounded-xl flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-2xl font-bold text-white">Строгость</div>
+                        <div class="text-sm text-slate-400">Незнание не освобождает от отвествености</div>
+                    </div>
+                </div>
+                
+                <div class="glass-card px-6 py-4 rounded-xl flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-2xl font-bold text-white">Защита</div>
+                        <div class="text-sm text-slate-400">Честная игра для всех</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-8">
+
+        <!-- Section 1: General Rules -->
+        <section id="general" class="fade-in-up delay-100">
+            <div class="glass-card rounded-2xl p-8 frost-border">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="rule-badge w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold text-cyan-400">
+                        01
+                    </div>
+                    <div>
+                        <h2 class="title-font text-3xl font-bold text-white">Общие правила анархии</h2>
+                        <p class="text-slate-400 mt-1">Базовые положения и ответственность</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="rule-item p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.1 Незнание правил</h3>
+                                <p class="text-slate-300">Незнание правил не освобождает вас от ответственности.</p>
+                            </div>
+                            <span class="punishment-tag punishment-warn">Обязательно к прочтению</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.2 Согласие с правилами</h3>
+                                <p class="text-slate-300">Начав играть на наших серверах, Вы автоматически подтверждаете своё согласие с данным сводом правил.</p>
+                            </div>
+                            <span class="punishment-tag punishment-warn">Автоматическое принятие</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.3 Решения администратора</h3>
+                                <p class="text-slate-300">Администратор вправе наказать игрока по причине, не указанной в настоящих правилах.</p>
+                            </div>
+                            <span class="punishment-tag punishment-warn">Право администрации</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.4 Ответственность администрации</h3>
+                                <p class="text-slate-300">Администрация не несет ответственности за временную или постоянную невозможность игры на сервере конкретным лицом или группой лиц.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.5 Обязанности игроков</h3>
+                                <p class="text-slate-300">Игроки обязаны соблюдать все правила.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.6 Логирование действий</h3>
+                                <p class="text-slate-300">Администрация ведет логи всех действий игроков на сервере и всех сообщений чата.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.7 Изменение правил</h3>
+                                <p class="text-slate-300">Администрация имеет право корректировать данный свод правил без уведомления игроков.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-red-500 bg-red-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.8 Реклама сторонних серверов</h3>
+                                <p class="text-slate-300">Запрещено намеренное распространение сторонних серверов.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан навсегда</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-red-500 bg-red-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.9 Никнейм</h3>
+                                <p class="text-slate-300">Ник не должен содержать оскорблений, мата, политики и т.п.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан навсегда (смените ник)</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-red-500 bg-red-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">1.10 Обман на реальные средства</h3>
+                                <p class="text-slate-300">Запрещён обман игроков на РЕАЛЬНЫЕ средства, донат и т.п.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан навсегда + ЧСП</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Chat Rules -->
+        <section id="chat" class="fade-in-up delay-200">
+            <div class="glass-card rounded-2xl p-8 frost-border">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="rule-badge w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold text-purple-400">
+                        02
+                    </div>
+                    <div>
+                        <h2 class="title-font text-3xl font-bold text-white">Правила чата</h2>
+                        <p class="text-slate-400 mt-1">Коммуникация и поведение в чате</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-yellow-500 bg-yellow-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">2.1 Спам и флуд</h3>
+                                <p class="text-slate-300">Запрещен спам и флуд (от 3-х и более сообщений). Капс от 4 заглавных букв.</p>
+                            </div>
+                            <span class="punishment-tag punishment-mute">Мут до 45 минут</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-yellow-500 bg-yellow-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">2.2 Оскорбление игроков</h3>
+                                <p class="text-slate-300">Запрещено оскорблять игроков в любом виде.</p>
+                            </div>
+                            <span class="punishment-tag punishment-mute">Мут 1 час</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-red-500 bg-red-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">2.2.1 Оскорбление администрации</h3>
+                                <p class="text-slate-300">Запрещено оскорблять администрацию в любом виде.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">По усмотрению администрации</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-red-500 bg-red-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">2.3 Упоминание семьи</h3>
+                                <p class="text-slate-300">Запрещено упоминать / оскорблять семью, родню.</p>
+                                <p class="text-sm text-slate-400 mt-1">Упоминание: предупреждение, затем мут на 1 день. Оскорбление: бан на 3 дня.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Мут/Бан</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-purple-500 bg-purple-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">2.4 Обход мута</h3>
+                                <p class="text-slate-300">Запрещён обходить мут. Клановый чат и таблички не считаются.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан до 5 часов</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-yellow-500 bg-yellow-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">2.5 Попрошайничество</h3>
+                                <p class="text-slate-300">Запрещено попрошайничество в любом его виде (Ресурсы, монеты, донат, разбан и т.п.).</p>
+                            </div>
+                            <span class="punishment-tag punishment-mute">Мут до 1 часа</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-yellow-500 bg-yellow-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">2.6 Неадекватное поведение</h3>
+                                <p class="text-slate-300">Запрещено неадекватное / аморальное поведение в чате.</p>
+                            </div>
+                            <span class="punishment-tag punishment-mute">Мут до 3 часов</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-yellow-500 bg-yellow-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">2.7 Провокации</h3>
+                                <p class="text-slate-300">Запрещено провоцировать игроков.</p>
+                            </div>
+                            <span class="punishment-tag punishment-mute">Предупреждение, затем мут на 1 час</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-red-500 bg-red-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">2.8 Оскорбление проекта</h3>
+                                <p class="text-slate-300">Запрещено оскорбление проекта. Возможность снятия наказания рассматривается администрацией.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан навсегда</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Behavior Rules -->
+        <section id="behavior" class="fade-in-up delay-300">
+            <div class="glass-card rounded-2xl p-8 frost-border">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="rule-badge w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold text-emerald-400">
+                        03
+                    </div>
+                    <div>
+                        <h2 class="title-font text-3xl font-bold text-white">Поведение на сервере</h2>
+                        <p class="text-slate-400 mt-1">Игровой процесс и взаимодействие</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-purple-500 bg-purple-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">3.1 Обход бана</h3>
+                                <p class="text-slate-300">Запрещено обходить бан с других аккаунтов.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан 1 день / 5 дней по IP</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-purple-500 bg-purple-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">3.2 Помеха ивентам</h3>
+                                <p class="text-slate-300">Запрещена помеха проводимым ивентам и нарушение их правил. Правила изменяются только если ивент делает администрация.</p>
+                            </div>
+                            <span class="punishment-tag punishment-kick">Кик / Бан 30 минут</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-red-500 bg-red-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">3.3 Чит-коды и ПО</h3>
+                                <p class="text-slate-300 mb-3">Запрещено использование чит-кодов, программ, скриптов и модификаций, предоставляющих необоснованные преимущества в игре.</p>
+                                
+                                <div class="bg-slate-800/50 rounded-lg p-4 space-y-2 text-sm">
+                                    <p class="text-slate-300"><span class="text-cyan-400 font-semibold">3.3.1</span> Персонал вправе потребовать проверку на наличие запрещенного ПО.</p>
+                                    <p class="text-slate-300"><span class="text-cyan-400 font-semibold">3.3.2</span> Проверка через: AnyDesk, Discord, TeamViewer, Telegram.</p>
+                                    <p class="text-slate-300"><span class="text-cyan-400 font-semibold">3.3.3</span> Во время проверки могут присутствовать только игрок и проверяющий.</p>
+                                    <p class="text-slate-300"><span class="text-cyan-400 font-semibold">3.3.4</span> Попытки помешать проверяющему = отказ от проверки.</p>
+                                    <p class="text-slate-300"><span class="text-cyan-400 font-semibold">3.3.5</span> Завершение процесса игры считается препятствием.</p>
+                                    <p class="text-slate-300"><span class="text-cyan-400 font-semibold">3.3.6</span> Признание до проверки = бан на 7 дней.</p>
+                                    <p class="text-slate-300"><span class="text-cyan-400 font-semibold">3.3.7</span> Дополнительное ПО загружается только с официальных сайтов.</p>
+                                    <p class="text-slate-300"><span class="text-cyan-400 font-semibold">3.3.8</span> Запрещена очистка компьютера перед проверкой (папки .minecraft, .tlauncher, корзина и т.д.). Срок давности очистки — 14 дней.</p>
+                                    <p class="text-slate-300"><span class="text-cyan-400 font-semibold">3.3.9</span> Администратор может записывать всю проверку.</p>
+                                </div>
+                            </div>
+                            <span class="punishment-tag punishment-ban">14 дней / 7 дней (признание)</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">3.4 Проверка без причин</h3>
+                                <p class="text-slate-300">Разрешена проверка на читы без явных на то причин / доказательств для администраций.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-red-500 bg-red-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">3.5 Злоупотребление багами</h3>
+                                <p class="text-slate-300">Запрещено злоупотребление уязвимостями / ошибками сервера, а также не сообщать о баге ради личной выгоды.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан до 7 дней</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-purple-500 bg-purple-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">3.6 Подстрекательство</h3>
+                                <p class="text-slate-300">Запрещено подстрекать игроков на нарушение правил.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан до 7 часов</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-purple-500 bg-purple-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">3.7 Некорректные наказания</h3>
+                                <p class="text-slate-300">Запрещено выдавать наказания по некорректной причине / на некорректное время.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан до 12 часов</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-purple-500 bg-purple-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">3.8 Снятие наказаний</h3>
+                                <p class="text-slate-300">Запрещено снимать наказания других игроков без причины.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан до 1 дня</span>
+                        </div>
+                    </div>
+
+                    <div class="rule-item p-4 rounded-lg border-l-4 border-l-red-500 bg-red-500/5">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white mb-2">3.8.1 Снятие наказаний администрации</h3>
+                                <p class="text-slate-300">Строго запрещено снимать наказания, которые выдала администрация.</p>
+                            </div>
+                            <span class="punishment-tag punishment-ban">Бан до 7 дней</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer Info -->
+        <footer class="mt-16 text-center fade-in-up delay-400">
+            <div class="glass-card rounded-2xl p-8 max-w-3xl mx-auto">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="title-font text-2xl font-bold text-white mb-3">Информация</h3>
+                <p class="text-slate-400 leading-relaxed">
+                    Администрация оставляет за собой право изменять правила в любое время без предварительного уведомления. 
+                    Начиная игру на сервере, вы автоматически соглашаетесь со всеми вышеперечисленными условиями.
+                </p>
+                <div class="mt-6 pt-6 border-t border-slate-700/30 text-sm text-slate-500">
+                    © 2026 Winter Anarchy. Все права защищены.
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" onclick="scrollToTop()" class="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center opacity-0 transition-all duration-300 hover:bg-cyan-500/30 hover:scale-110 z-50 backdrop-blur-sm">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+        </svg>
+    </button>
+
+    <script>
+        // Snow Animation
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.innerHTML = '❄';
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+            
+            document.getElementById('snowContainer').appendChild(snowflake);
+            
+            setTimeout(() => {
+                snowflake.remove();
+            }, 5000);
+        }
+
+        setInterval(createSnowflake, 100);
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('open');
+        }
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Active Navigation Link
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').slice(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Back to Top Button
+            const backToTop = document.getElementById('backToTop');
+            if (window.scrollY > 500) {
+                backToTop.style.opacity = '1';
+                backToTop.style.pointerEvents = 'auto';
+            } else {
+                backToTop.style.opacity = '0';
+                backToTop.style.pointerEvents = 'none';
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Intersection Observer for Animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add glow effect on mouse move
+        document.addEventListener('mousemove', (e) => {
+            const glows = document.querySelectorAll('.glow');
+            glows.forEach((glow, index) => {
+                const speed = (index + 1) * 0.02;
+                const x = e.clientX * speed;
+                const y = e.clientY * speed;
+                glow.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
